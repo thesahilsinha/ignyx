@@ -86,3 +86,47 @@ export async function getPagesAndIgAccount(userToken: string): Promise<{
     igBusinessId: page.instagram_business_account?.id || null,
   };
 }
+
+// --- Instagram Login (API with Instagram Login) functions, used for the primary connect flow ---
+
+const IG_GRAPH_BASE = "https://graph.instagram.com/v21.0";
+
+export async function replyToComment(commentId: string, message: string, token: string): Promise<void> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${commentId}/replies`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, access_token: token }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error?.message || "Failed to reply to comment");
+  }
+}
+
+export async function sendPrivateReplyToComment(commentId: string, message: string, token: string): Promise<void> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${commentId}/private_replies`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message, access_token: token }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error?.message || "Failed to send private reply");
+  }
+}
+
+export async function sendDirectMessage(igUserId: string, recipientId: string, message: string, token: string): Promise<void> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: message },
+      access_token: token,
+    }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error?.message || "Failed to send DM");
+  }
+}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyWebhookSignature } from "@/lib/meta";
+import { processInstagramWebhook } from "@/lib/process-webhook";
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams;
@@ -24,8 +25,11 @@ export async function POST(req: NextRequest) {
 
   const payload = JSON.parse(rawBody);
 
-  // TODO (Chunk 4): route payload.entry[] events to comment/DM/story rule matching per client.
-  console.log("IG webhook event:", JSON.stringify(payload));
+  try {
+    await processInstagramWebhook(payload);
+  } catch (err) {
+    console.error("Webhook processing error:", err);
+  }
 
   return new NextResponse("EVENT_RECEIVED", { status: 200 });
 }
