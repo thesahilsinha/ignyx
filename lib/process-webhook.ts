@@ -1,7 +1,7 @@
 import { getCentralClient } from "./supabase-central";
 import { getClientDbClient } from "./supabase-client-db";
-import { findMatchingCommentRule, CommentRule } from "./rules";
-import { replyToComment, sendPrivateReplyToComment } from "./meta";
+import { findMatchingCommentRule, matches, CommentRule } from "./rules";
+import { replyToComment, sendPrivateReplyToComment, sendDirectMessage } from "./meta";
 
 interface CommentChange {
   field: string;
@@ -12,9 +12,16 @@ interface CommentChange {
   };
 }
 
+interface MessagingEvent {
+  sender: { id: string };
+  recipient: { id: string };
+  message?: { text?: string };
+}
+
 interface WebhookEntry {
   id: string;
   changes?: CommentChange[];
+  messaging?: MessagingEvent[];
 }
 
 interface WebhookPayload {
@@ -38,6 +45,12 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
     for (const change of entry.changes || []) {
       if (change.field === "comments") {
         await handleComment(client, change.value);
+      }
+    }
+
+    for (const msg of entry.messaging || []) {
+      if (msg.message?.text) {
+        await handleDirectMessage(client, msg.sender.id, msg.message.text);
       }
     }
   }
@@ -67,5 +80,41 @@ async function handleComment(
     if (matched.dm_text) {
       await sendPrivateReplyToComment(comment.id, matched.dm_text, token);
     }
+  }
+}
+
+async function handleDirectMessage(
+  client: { supabase_url: string; supabase_anon_key: string; meta_access_token: string; meta_ig_business_id: string },
+  senderId: string,
+  text: string
+) {
+  const clientDb = getClientDbClient(client.supabase_url, client.supabase_anon_key);
+
+  const { data: rules } = await clientDb
+    .from("dm_story_rules")
+    .select("*")
+    .eq("channel", "dm");
+
+  const token = client.meta_access_token;
+
+  if (rules && rules.length > 0) {
+    for (const rule of rules) {
+      if (matches(text, rule.trigger_word, rule.match_method)) {
+        if (rule.reply_text) {
+          await sendDirectMessage(client.meta_ig_business_id, senderId, rule.reply_text, token);
+        }
+        return;
+      }
+    }
+  }
+
+  const { data: fallback } = await clientDb
+    .from("fallback_messages")
+    .select("*")
+    .eq("message_type", "exception")
+    .single();
+
+  if (fallback?.content) {
+    await sendDirectMessage(client.meta_ig_business_id, senderId, fallback.content, token);
   }
 }
