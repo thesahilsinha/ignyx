@@ -1,5 +1,5 @@
 import { getCentralClient } from "./supabase-central";
-import { getClientDbClient } from "./supabase-client-db";
+import { getClientDbServiceClient } from "./supabase-client-db";
 import { findMatchingCommentRule, matches, CommentRule } from "./rules";
 import { replyToComment, sendPrivateReplyToComment, sendDirectMessage } from "./meta";
 
@@ -66,10 +66,10 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
 }
 
 async function handleComment(
-  client: { supabase_url: string; supabase_anon_key: string; meta_access_token: string },
+  client: { supabase_url: string; supabase_service_key: string; meta_access_token: string },
   comment: { id: string; text: string }
 ) {
-  const clientDb = getClientDbClient(client.supabase_url, client.supabase_anon_key);
+  const clientDb = getClientDbServiceClient(client.supabase_url, client.supabase_service_key);
 
   const { data: rules } = await clientDb.from("comment_rules").select("*");
   if (!rules || rules.length === 0) return;
@@ -93,18 +93,18 @@ async function handleComment(
 }
 
 async function handleDirectMessage(
-  client: { supabase_url: string; supabase_anon_key: string; meta_access_token: string; meta_ig_business_id: string },
+  client: { supabase_url: string; supabase_service_key: string; meta_access_token: string; meta_ig_business_id: string },
   senderId: string,
   text: string
 ) {
-  const clientDb = getClientDbClient(client.supabase_url, client.supabase_anon_key);
+  const clientDb = getClientDbServiceClient(client.supabase_url, client.supabase_service_key);
 
-  const { data: rules } = await clientDb
+  const { data: rules, error: rulesError } = await clientDb
     .from("dm_story_rules")
     .select("*")
     .eq("channel", "dm");
 
-  console.log("WEBHOOK: dm_story_rules found:", rules?.length || 0);
+  console.log("WEBHOOK: dm_story_rules found:", rules?.length || 0, rulesError ? `error: ${rulesError.message}` : "");
 
   const token = client.meta_access_token;
 
