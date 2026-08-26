@@ -3,25 +3,23 @@ import { getClientDbClient } from "./supabase-client-db";
 import { findMatchingCommentRule, matches, CommentRule } from "./rules";
 import { replyToComment, sendPrivateReplyToComment, sendDirectMessage } from "./meta";
 
-interface CommentChange {
-  field: string;
-  value: {
-    id: string;
-    text: string;
-    from?: { id: string; username: string };
-  };
+interface ChangeValue {
+  id?: string;
+  text?: string;
+  from?: { id: string; username: string };
+  sender?: { id: string };
+  recipient?: { id: string };
+  message?: { mid: string; text: string };
 }
 
-interface MessagingEvent {
-  sender: { id: string };
-  recipient: { id: string };
-  message?: { text?: string };
+interface Change {
+  field: string;
+  value: ChangeValue;
 }
 
 interface WebhookEntry {
   id: string;
-  changes?: CommentChange[];
-  messaging?: MessagingEvent[];
+  changes?: Change[];
 }
 
 interface WebhookPayload {
@@ -43,14 +41,12 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
     if (!client || !client.meta_access_token) continue;
 
     for (const change of entry.changes || []) {
-      if (change.field === "comments") {
-        await handleComment(client, change.value);
+      if (change.field === "comments" && change.value.id && change.value.text) {
+        await handleComment(client, { id: change.value.id, text: change.value.text });
       }
-    }
 
-    for (const msg of entry.messaging || []) {
-      if (msg.message?.text) {
-        await handleDirectMessage(client, msg.sender.id, msg.message.text);
+      if (change.field === "messages" && change.value.sender && change.value.message?.text) {
+        await handleDirectMessage(client, change.value.sender.id, change.value.message.text);
       }
     }
   }
