@@ -2,6 +2,7 @@ import { getCentralClient } from "./supabase-central";
 import { getClientDbServiceClient } from "./supabase-client-db";
 import { findMatchingCommentRule, matches, CommentRule } from "./rules";
 import { replyToComment, sendPrivateReplyToComment, sendDirectMessage } from "./meta";
+import { generateAiReply } from "./groq";
 
 interface CommentChangeValue {
   id: string;
@@ -31,7 +32,6 @@ interface WebhookPayload {
 }
 
 export async function processInstagramWebhook(payload: WebhookPayload): Promise<void> {
-  console.log("WEBHOOK: received payload", JSON.stringify(payload));
   const centralDb = getCentralClient();
 
   for (const entry of payload.entry) {
@@ -43,22 +43,16 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
       .eq("meta_ig_business_id", igUserId)
       .single();
 
-    if (!client || !client.meta_access_token) {
-      console.log("WEBHOOK: no client found, skipping");
-      continue;
-    }
-    console.log("WEBHOOK: found client", client.business_name);
+    if (!client || !client.meta_access_token) continue;
 
     for (const change of entry.changes || []) {
       if (change.field === "comments" && change.value.id && change.value.text) {
-        console.log("WEBHOOK: comment received:", change.value.text);
         await handleComment(client, { id: change.value.id, text: change.value.text });
       }
     }
 
     for (const msg of entry.messaging || []) {
       if (msg.message?.text) {
-        console.log("WEBHOOK: DM text received:", msg.message.text, "from", msg.sender.id);
         await handleDirectMessage(client, msg.sender.id, msg.message.text);
       }
     }
@@ -93,40 +87,43 @@ async function handleComment(
 }
 
 async function handleDirectMessage(
-  client: { supabase_url: string; supabase_service_key: string; meta_access_token: string; meta_ig_business_id: string },
+  client: {
+    supabase_url: string;
+    supabase_service_key: string;
+    meta_access_token: string;
+    meta_ig_business_id: string;
+    ai_plus_enabled: boolean;
+    groq_api_key: string | null;
+  },
   senderId: string,
   text: string
 ) {
   const clientDb = getClientDbServiceClient(client.supabase_url, client.supabase_service_key);
 
-  const { data: rules, error: rulesError } = await clientDb
-    .from("dm_story_rules")
-    .select("*")
-    .eq("channel", "dm");
-
-  console.log("WEBHOOK: dm_story_rules found:", rules?.length || 0, rulesError ? `error: ${rulesError.message}` : "");
-
+  const { data: rules } = await clientDb.from("dm_story_rules").select("*").eq("channel", "dm");
   const token = client.meta_access_token;
 
   if (rules && rules.length > 0) {
     for (const rule of rules) {
-      const isMatch = matches(text, rule.trigger_word, rule.match_method);
-      console.log(`WEBHOOK: checking rule "${rule.trigger_word}" -> ${isMatch}`);
-      if (isMatch) {
+      if (matches(text, rule.trigger_word, rule.match_method)) {
         if (rule.reply_text) {
-          try {
-            await sendDirectMessage(client.meta_ig_business_id, senderId, rule.reply_text, token);
-            console.log("WEBHOOK: rule reply sent successfully");
-          } catch (err) {
-            console.log("WEBHOOK: ERROR sending rule reply:", err instanceof Error ? err.message : String(err));
-          }
+          await sendDirectMessage(client.meta_ig_business_id, senderId, rule.reply_text, token);
         }
         return;
       }
     }
   }
 
-  console.log("WEBHOOK: no rule matched, checking fallback");
+  if (client.ai_plus_enabled && client.groq_api_key) {
+    const { data: contextRow } = await clientDb.from("ai_context").select("context_text").single();
+    const context = contextRow?.context_text || "You are a helpful assistant for this Instagram business.";
+    const aiReply = await generateAiReply(client.groq_api_key, context, text);
+    if (aiReply) {
+      await sendDirectMessage(client.meta_ig_business_id, senderId, aiReply, token);
+      return;
+    }
+  }
+
   const { data: fallback } = await clientDb
     .from("fallback_messages")
     .select("*")
@@ -134,11 +131,6 @@ async function handleDirectMessage(
     .single();
 
   if (fallback?.content) {
-    try {
-      await sendDirectMessage(client.meta_ig_business_id, senderId, fallback.content, token);
-      console.log("WEBHOOK: fallback reply sent successfully");
-    } catch (err) {
-      console.log("WEBHOOK: ERROR sending fallback reply:", err instanceof Error ? err.message : String(err));
-    }
+    await sendDirectMessage(client.meta_ig_business_id, senderId, fallback.content, token);
   }
 }
