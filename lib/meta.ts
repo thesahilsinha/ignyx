@@ -130,3 +130,26 @@ export async function sendDirectMessage(igUserId: string, recipientId: string, m
     throw new Error(data.error?.message || "Failed to send DM");
   }
 }
+
+
+export async function createMediaContainer(igUserId: string, imageUrl: string, caption: string, token: string): Promise<string> {
+  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image_url: imageUrl, caption, access_token: token }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to create media container");
+  return data.id as string;
+}
+
+export async function publishMediaContainer(igUserId: string, containerId: string, token: string): Promise<string> {
+  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: containerId, access_token: token }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to publish container");
+  return data.id as string;
+}
