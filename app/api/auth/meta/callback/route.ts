@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       .update({
         meta_page_id: pageInfo.pageId,
         meta_page_access_token: pageInfo.pageAccessToken,
+        meta_user_access_token: userToken,
         meta_token_expires_at: expiresAt,
       })
       .eq("id", clientId);

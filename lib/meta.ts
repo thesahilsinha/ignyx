@@ -154,3 +154,21 @@ export async function publishMediaContainer(igUserId: string, containerId: strin
   if (!res.ok) throw new Error(data.error?.message || "Failed to publish container");
   return data.id as string;
 }
+
+
+export async function getAdAccountId(userToken: string): Promise<string | null> {
+  const res = await fetch(`https://graph.facebook.com/v21.0/me/adaccounts?fields=id,name&access_token=${userToken}`);
+  const data = await res.json();
+  if (!res.ok || !data.data || data.data.length === 0) return null;
+  return data.data[0].id as string;
+}
+
+export async function getAdInsights(adAccountId: string, token: string) {
+  const fields = "spend,impressions,reach,clicks,ctr";
+  const res = await fetch(
+    `https://graph.facebook.com/v21.0/${adAccountId}/insights?fields=${fields}&date_preset=last_30d&access_token=${token}`
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to fetch ad insights");
+  return data.data?.[0] || null;
+}
