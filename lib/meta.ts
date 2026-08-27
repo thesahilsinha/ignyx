@@ -4,7 +4,7 @@ const GRAPH_BASE = "https://graph.facebook.com/v21.0";
 
 export function verifyWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
   if (!signatureHeader) return false;
-  const appSecret = process.env.META_APP_SECRET as string;
+  const appSecret = process.env.IG_APP_SECRET as string;
   const expected = "sha256=" + crypto.createHmac("sha256", appSecret).update(rawBody).digest("hex");
   const a = Buffer.from(expected);
   const b = Buffer.from(signatureHeader);
