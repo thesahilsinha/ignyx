@@ -22,6 +22,7 @@ export function getMetaLoginUrl(state: string): string {
     "instagram_content_publish",
     "pages_show_list",
     "pages_read_engagement",
+    "business_management",
     "ads_read",
     "catalog_management",
   ].join(",");
