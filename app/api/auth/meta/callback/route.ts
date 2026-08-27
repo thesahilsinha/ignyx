@@ -19,8 +19,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/admin/clients?meta_error=no_ig_account`);
     }
 
-    const { token: pageLongToken, expiresIn } = await getLongLivedToken(pageInfo.pageAccessToken);
-    const expiresAt = new Date(Date.now() + expiresIn * 1000).toISOString();
+    const expiresAt = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString();
 
     const db = getCentralClient();
     await db
@@ -28,7 +27,7 @@ export async function GET(req: NextRequest) {
       .update({
         meta_page_id: pageInfo.pageId,
         meta_ig_business_id: pageInfo.igBusinessId,
-        meta_access_token: pageLongToken,
+        meta_access_token: pageInfo.pageAccessToken,
         meta_token_expires_at: expiresAt,
       })
       .eq("id", clientId);
