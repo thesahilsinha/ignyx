@@ -15,6 +15,8 @@ export interface Client {
   meta_page_id: string | null;
   meta_ig_business_id: string | null;
   meta_access_token: string | null;
+  meta_page_access_token: string | null;
+  meta_user_access_token: string | null;
   meta_token_expires_at: string | null;
   ai_plus_enabled: boolean;
   groq_api_key: string | null;
