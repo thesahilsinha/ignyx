@@ -26,8 +26,7 @@ export async function GET(req: NextRequest) {
       .from("clients")
       .update({
         meta_page_id: pageInfo.pageId,
-        meta_ig_business_id: pageInfo.igBusinessId,
-        meta_access_token: pageInfo.pageAccessToken,
+        meta_page_access_token: pageInfo.pageAccessToken,
         meta_token_expires_at: expiresAt,
       })
       .eq("id", clientId);
