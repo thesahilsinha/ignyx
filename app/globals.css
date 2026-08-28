@@ -2,12 +2,18 @@
 
 @theme {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-sans);
+--font-mono: var(--font-mono), ui-monospace, monospace;
+--font-serif: var(--font-serif), Georgia, serif;
+--font-mono: var(--font-mono), ui-monospace, monospace;
+
+
 }
 
 :root {
   --color-accent: #fd1d8d;
-  --color-accent-dark: #c9166f;
-  --color-accent-start: #833ab4;
+  /* --color-accent-dark: #c9166f; */
+  --color-accent-start: #fb2ca1;
   --color-accent-mid: #fd1d8d;
   --color-accent-end: #fd8d1d;
   --color-ink: #1a1523;
@@ -16,6 +22,14 @@
   --color-surface-raised: #ffffff;
   --color-border: #e9e2f0;
   --color-text-muted: #6b6579;
+  --color-surface: #FAF9F6;
+  --color-surface-raised: rgba(255, 255, 255, 0.72);
+  --color-surface-muted: #F1EDE6;
+  --color-border: rgba(21, 18, 12, 0.10);
+  --color-ink: #16130F;
+  --color-text-muted: #6C6759;
+  --color-accent: #ff18c1;       /* plum — primary */
+  --color-accent-warm: #C9954A; 
 }
 
 .dark {
@@ -77,4 +91,109 @@ body {
 
 .btn-primary:active {
   transform: scale(0.98);
+}
+
+.marketing {
+  --m-ink: #111111;
+  --m-paper: #ffffff;
+  --m-accent: #ff2e63;
+  --m-accent-2: #ffd23f;
+  font-family: var(--font-sans);
+  color: var(--m-ink);
+  background: var(--m-paper);
+}
+
+.marketing h1, .marketing h2, .marketing h3, .marketing .m-display {
+  font-family: var(--font-display), sans-serif;
+}
+
+.marketing .m-mono {
+  font-family: var(--font-mono), monospace;
+}
+
+.marketing .m-block {
+  border: 2.5px solid var(--m-ink);
+  background: var(--m-paper);
+}
+
+.marketing .m-shadow {
+  box-shadow: 6px 6px 0 var(--m-ink);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.marketing .m-shadow:hover {
+  box-shadow: 2px 2px 0 var(--m-ink);
+  transform: translate(4px, 4px);
+}
+
+.marketing .m-btn {
+  border: 2.5px solid var(--m-ink);
+  background: var(--m-accent);
+  color: var(--m-ink);
+  font-weight: 700;
+  box-shadow: 5px 5px 0 var(--m-ink);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.marketing .m-btn:hover {
+  box-shadow: 2px 2px 0 var(--m-ink);
+  transform: translate(3px, 3px);
+}
+
+.marketing .m-btn-ghost {
+  border: 2.5px solid var(--m-ink);
+  background: transparent;
+  color: var(--m-ink);
+  font-weight: 700;
+}
+
+.marketing .m-tag {
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  border: 1.5px solid var(--m-ink);
+  padding: 2px 8px;
+  display: inline-block;
+}
+
+@keyframes m-bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.marketing .m-bubble-1 {
+  animation: m-bubble-in 0.4s ease 0.2s both;
+}
+
+.marketing .m-bubble-typing {
+  animation: m-bubble-in 0.4s ease 1s both;
+}
+
+.marketing .m-bubble-2 {
+  animation: m-bubble-in 0.4s ease 2.3s both;
+}
+
+.marketing .m-typing-dot {
+  animation: m-dot 1s infinite ease-in-out;
+}
+.marketing .m-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.marketing .m-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes m-dot {
+  0%, 60%, 100% { opacity: 0.25; }
+  30% { opacity: 1; }
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.32; transform: scale(1.08); }
 }
