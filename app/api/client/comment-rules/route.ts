@@ -43,6 +43,34 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ rule: data });
 }
 
+export async function PATCH(req: NextRequest) {
+  const client = await getCurrentClient();
+  if (!client) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const id = req.nextUrl.searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  const body = await req.json();
+  const db = getClientDbServiceClient(client.supabase_url, client.supabase_service_key);
+
+  const { data, error } = await db
+    .from("comment_rules")
+    .update({
+      trigger_word: body.trigger_word,
+      match_method: body.match_method,
+      action_type: body.action_type,
+      reply_text: body.reply_text || null,
+      dm_text: body.dm_text || null,
+      dm_media_url: body.dm_media_url || null,
+    })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ rule: data });
+}
+
 export async function DELETE(req: NextRequest) {
   const client = await getCurrentClient();
   if (!client) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

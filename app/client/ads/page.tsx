@@ -25,6 +25,15 @@ interface Insights {
   ctr?: string;
 }
 
+function Kpi({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="card p-5">
+      <div className="text-xs text-[var(--color-text-muted)] mb-1">{label}</div>
+      <div className="text-2xl font-bold">{value}</div>
+    </div>
+  );
+}
+
 export default function AdsPage() {
   const [insights, setInsights] = useState<Insights | null>(null);
   const [error, setError] = useState("");
@@ -44,44 +53,41 @@ export default function AdsPage() {
       });
   }, []);
 
-  if (loading) return null;
-
   const isGrowth = plan === "growth";
 
   return (
     <AppShell title="IGNYX" navItems={navItems}>
-      <h1 className="text-xl font-semibold mb-4">Ads analytics ({isGrowth ? "Advanced" : "Basic"})</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-1">Ads analytics</h1>
+        <p className="text-sm text-[var(--color-text-muted)]">
+          <span className="ig-gradient-text font-medium">{isGrowth ? "Advanced" : "Basic"}</span> — last 30 days
+        </p>
+      </div>
 
-      {error && (
-        <div className="gradient-border p-6 max-w-2xl">
-          <p className="text-sm text-slate-600">{error}</p>
+      {loading && <div className="text-sm text-[var(--color-text-muted)]">Loading...</div>}
+
+      {!loading && error && !insights && (
+        <div className="card p-8 text-center max-w-md">
+          <div className="w-12 h-12 rounded-full ig-gradient mx-auto mb-4 flex items-center justify-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+              <path d="M3 3v18h18" />
+              <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3" />
+            </svg>
+          </div>
+          <div className="font-medium mb-1">No ad data yet</div>
+          <p className="text-sm text-[var(--color-text-muted)]">{error}</p>
         </div>
       )}
 
       {insights && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="gradient-border p-5">
-            <div className="text-sm text-slate-500 mb-1">Spend</div>
-            <div className="text-lg font-semibold">₹{insights.spend || "0"}</div>
-          </div>
-          <div className="gradient-border p-5">
-            <div className="text-sm text-slate-500 mb-1">Reach</div>
-            <div className="text-lg font-semibold">{insights.reach || "0"}</div>
-          </div>
-          <div className="gradient-border p-5">
-            <div className="text-sm text-slate-500 mb-1">Impressions</div>
-            <div className="text-lg font-semibold">{insights.impressions || "0"}</div>
-          </div>
+          <Kpi label="Spend" value={`₹${insights.spend || "0"}`} />
+          <Kpi label="Reach" value={insights.reach || "0"} />
+          <Kpi label="Impressions" value={insights.impressions || "0"} />
           {isGrowth && (
             <>
-              <div className="gradient-border p-5">
-                <div className="text-sm text-slate-500 mb-1">Clicks</div>
-                <div className="text-lg font-semibold">{insights.clicks || "0"}</div>
-              </div>
-              <div className="gradient-border p-5">
-                <div className="text-sm text-slate-500 mb-1">CTR</div>
-                <div className="text-lg font-semibold">{insights.ctr || "0"}%</div>
-              </div>
+              <Kpi label="Clicks" value={insights.clicks || "0"} />
+              <Kpi label="CTR" value={`${insights.ctr || "0"}%`} />
             </>
           )}
         </div>
