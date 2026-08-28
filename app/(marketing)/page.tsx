@@ -62,16 +62,26 @@ export default function HomePage() {
       <MarketingHeader />
 
       {/* ============ TICKER ============ */}
-      <div className="border-b border-[var(--color-border)] bg-[var(--color-ink)] overflow-hidden">
-        <div className="flex whitespace-nowrap py-2.5 animate-[ticker_16s_linear_infinite] motion-reduce:animate-none">
-          {[...ticker, ...ticker].map((t, i) => (
-            <span key={i} className="flex items-center font-mono text-[12px] text-white/70 px-6">
-              {t}
-              <span className="ml-6 text-pink-400">·</span>
-            </span>
-          ))}
-        </div>
-      </div>
+<div className="border-b border-[var(--color-border)] bg-[var(--color-ink)] overflow-hidden">
+  <div className="flex w-max animate-[ticker_28s_linear_infinite] md:animate-[ticker_36s_linear_infinite] will-change-transform motion-reduce:animate-none">
+    <div className="flex whitespace-nowrap py-2.5 shrink-0">
+      {ticker.map((t, i) => (
+        <span key={`a-${i}`} className="flex items-center font-mono text-[12px] text-white/70 px-6">
+          {t}
+          <span className="ml-6 text-pink-400">·</span>
+        </span>
+      ))}
+    </div>
+    <div className="flex whitespace-nowrap py-2.5 shrink-0" aria-hidden="true">
+      {ticker.map((t, i) => (
+        <span key={`b-${i}`} className="flex items-center font-mono text-[12px] text-white/70 px-6">
+          {t}
+          <span className="ml-6 text-pink-400">·</span>
+        </span>
+      ))}
+    </div>
+  </div>
+</div>
 
       {/* ============ HERO — centered, glass panel, ambient glow ============ */}
       <section className="relative px-6 pt-20 pb-6 overflow-visible">
