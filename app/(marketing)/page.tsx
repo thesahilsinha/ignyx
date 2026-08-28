@@ -63,11 +63,11 @@ export default function HomePage() {
 
       {/* ============ TICKER ============ */}
       <div className="border-b border-[var(--color-border)] bg-[var(--color-ink)] overflow-hidden">
-        <div className="flex whitespace-nowrap py-2.5 animate-[ticker_28s_linear_infinite] motion-reduce:animate-none">
+        <div className="flex whitespace-nowrap py-2.5 animate-[ticker_16s_linear_infinite] motion-reduce:animate-none">
           {[...ticker, ...ticker].map((t, i) => (
             <span key={i} className="flex items-center font-mono text-[12px] text-white/70 px-6">
               {t}
-              <span className="ml-6 text-[var(--color-accent-warm)]">·</span>
+              <span className="ml-6 text-pink-400">·</span>
             </span>
           ))}
         </div>
