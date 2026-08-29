@@ -24,6 +24,14 @@ const emptyForm = {
   supabase_url: "",
   supabase_anon_key: "",
   supabase_service_key: "",
+  meta_ig_business_id: "",
+  meta_access_token: "",
+  meta_page_id: "",
+  meta_page_access_token: "",
+  meta_user_access_token: "",
+  ai_plus_enabled: false,
+  groq_api_key: "",
+  catalogue_enabled: false,
 };
 
 export default function ClientsPage() {
@@ -53,6 +61,14 @@ export default function ClientsPage() {
       supabase_url: c.supabase_url,
       supabase_anon_key: c.supabase_anon_key,
       supabase_service_key: c.supabase_service_key,
+      meta_ig_business_id: c.meta_ig_business_id || "",
+      meta_access_token: c.meta_access_token || "",
+      meta_page_id: c.meta_page_id || "",
+      meta_page_access_token: c.meta_page_access_token || "",
+      meta_user_access_token: c.meta_user_access_token || "",
+      ai_plus_enabled: c.ai_plus_enabled,
+      groq_api_key: c.groq_api_key || "",
+      catalogue_enabled: c.catalogue_enabled,
     });
     setShowForm(true);
   }
@@ -68,7 +84,7 @@ export default function ClientsPage() {
 
     if (editingId) {
       const { password, ...rest } = form;
-      const updates: Record<string, string> = { ...rest };
+      const updates: Record<string, string | boolean> = { ...rest };
       if (password) updates.password = password;
       await fetch(`/api/admin/clients/${editingId}`, {
         method: "PATCH",
@@ -111,19 +127,63 @@ export default function ClientsPage() {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="card p-5 mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input placeholder="Business name" value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <input placeholder="Contact email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" disabled={!!editingId} />
-          <input placeholder={editingId ? "New password (leave blank to keep)" : "Password"} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2">
-            <option value="starter">Starter</option>
-            <option value="growth">Growth</option>
-          </select>
-          <input placeholder="Supabase URL" value={form.supabase_url} onChange={(e) => setForm({ ...form, supabase_url: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <input placeholder="Supabase anon key" value={form.supabase_anon_key} onChange={(e) => setForm({ ...form, supabase_anon_key: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <input placeholder="Supabase service key" value={form.supabase_service_key} onChange={(e) => setForm({ ...form, supabase_service_key: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
-          <button type="submit" className="md:col-span-2 btn-primary py-2 text-sm">
+        <form onSubmit={handleSubmit} className="card p-5 mb-6 space-y-5">
+          <div>
+            <div className="text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide">Business</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input placeholder="Business name" value={form.business_name} onChange={(e) => setForm({ ...form, business_name: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="Contact email" value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" disabled={!!editingId} />
+              <input placeholder={editingId ? "New password (leave blank to keep)" : "Password"} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2">
+                <option value="starter">Starter</option>
+                <option value="growth">Growth</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide">Client Supabase</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input placeholder="Supabase URL" value={form.supabase_url} onChange={(e) => setForm({ ...form, supabase_url: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2" />
+              <input placeholder="Supabase anon key" value={form.supabase_anon_key} onChange={(e) => setForm({ ...form, supabase_anon_key: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="Supabase service key" value={form.supabase_service_key} onChange={(e) => setForm({ ...form, supabase_service_key: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide">Instagram Login</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input placeholder="Instagram Business Account ID" value={form.meta_ig_business_id} onChange={(e) => setForm({ ...form, meta_ig_business_id: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="Instagram access token" value={form.meta_access_token} onChange={(e) => setForm({ ...form, meta_access_token: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide">Facebook Login (ads / catalogue)</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input placeholder="Facebook Page ID" value={form.meta_page_id} onChange={(e) => setForm({ ...form, meta_page_id: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="Page access token" value={form.meta_page_access_token} onChange={(e) => setForm({ ...form, meta_page_access_token: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <input placeholder="User access token (for ads)" value={form.meta_user_access_token} onChange={(e) => setForm({ ...form, meta_user_access_token: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2" />
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs font-medium text-[var(--color-text-muted)] mb-2 uppercase tracking-wide">Add-ons</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 text-sm border border-[var(--color-border)] rounded-lg px-3 py-2">
+                <input type="checkbox" checked={form.ai_plus_enabled} onChange={(e) => setForm({ ...form, ai_plus_enabled: e.target.checked })} />
+                AI+ enabled
+              </label>
+              <input placeholder="Groq API key" value={form.groq_api_key} onChange={(e) => setForm({ ...form, groq_api_key: e.target.value })} className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2" />
+              <label className="flex items-center gap-2 text-sm border border-[var(--color-border)] rounded-lg px-3 py-2 md:col-span-2">
+                <input type="checkbox" checked={form.catalogue_enabled} onChange={(e) => setForm({ ...form, catalogue_enabled: e.target.checked })} />
+                Catalogue enabled
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" className="btn-primary py-2 px-4 text-sm">
             {editingId ? "Save changes" : "Save client"}
           </button>
         </form>
