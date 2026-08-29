@@ -24,13 +24,15 @@ interface CommentRule {
   action_type: string;
   reply_text: string | null;
   dm_text: string | null;
+  dm_media_url: string | null;
 }
 
-const emptyForm = { trigger_word: "", match_method: "contains", action_type: "reply", reply_text: "", dm_text: "" };
+const emptyForm = { trigger_word: "", match_method: "contains", action_type: "reply", reply_text: "", dm_text: "", dm_media_url: "" };
 
 export default function CommentsPage() {
   const [rules, setRules] = useState<CommentRule[]>([]);
   const [limit, setLimit] = useState(8);
+  const [plan, setPlan] = useState("starter");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -41,6 +43,7 @@ export default function CommentsPage() {
     const data = await res.json();
     setRules(data.rules || []);
     setLimit(data.limit || 8);
+    setPlan(data.plan || "starter");
   }
 
   useEffect(() => {
@@ -55,6 +58,7 @@ export default function CommentsPage() {
       action_type: rule.action_type,
       reply_text: rule.reply_text || "",
       dm_text: rule.dm_text || "",
+      dm_media_url: rule.dm_media_url || "",
     });
     setShowForm(true);
   }
@@ -96,6 +100,8 @@ export default function CommentsPage() {
     await fetch(`/api/client/comment-rules?id=${id}`, { method: "DELETE" });
     loadRules();
   }
+
+  const isGrowth = plan === "growth";
 
   return (
     <AppShell title="IGNYX" navItems={navItems}>
@@ -145,12 +151,26 @@ export default function CommentsPage() {
             />
           )}
           {(form.action_type === "dm" || form.action_type === "both") && (
-            <input
-              placeholder="DM text"
-              value={form.dm_text}
-              onChange={(e) => setForm({ ...form, dm_text: e.target.value })}
-              className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2"
-            />
+            <>
+              <input
+                placeholder="DM text"
+                value={form.dm_text}
+                onChange={(e) => setForm({ ...form, dm_text: e.target.value })}
+                className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2"
+              />
+              {isGrowth ? (
+                <input
+                  placeholder="Image or video URL for the DM (optional)"
+                  value={form.dm_media_url}
+                  onChange={(e) => setForm({ ...form, dm_media_url: e.target.value })}
+                  className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2"
+                />
+              ) : (
+                <p className="text-xs text-[var(--color-text-muted)] md:col-span-2">
+                  Media in DM replies is a Growth-plan feature.
+                </p>
+              )}
+            </>
           )}
           {error && <p className="text-sm text-red-500 md:col-span-2">{error}</p>}
           <button type="submit" className="md:col-span-2 btn-primary py-2 text-sm">
@@ -168,7 +188,8 @@ export default function CommentsPage() {
               </div>
               <div className="text-sm text-[var(--color-text-muted)]">
                 {r.reply_text && <span>Reply: {r.reply_text} </span>}
-                {r.dm_text && <span>DM: {r.dm_text}</span>}
+                {r.dm_text && <span>DM: {r.dm_text} </span>}
+                {r.dm_media_url && <span>· has media</span>}
               </div>
             </div>
             <div className="flex items-center gap-3">

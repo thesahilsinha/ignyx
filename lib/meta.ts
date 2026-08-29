@@ -172,3 +172,26 @@ export async function getAdInsights(adAccountId: string, token: string) {
   if (!res.ok) throw new Error(data.error?.message || "Failed to fetch ad insights");
   return data.data?.[0] || null;
 }
+
+
+export async function sendMediaMessage(igUserId: string, recipientId: string, mediaUrl: string, token: string): Promise<void> {
+  const isVideo = /\.(mp4|mov|m4v)$/i.test(mediaUrl);
+  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: {
+        attachment: {
+          type: isVideo ? "video" : "image",
+          payload: { url: mediaUrl },
+        },
+      },
+      access_token: token,
+    }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error?.message || "Failed to send media message");
+  }
+}

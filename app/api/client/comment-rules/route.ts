@@ -10,7 +10,7 @@ export async function GET() {
   const { data, error } = await db.from("comment_rules").select("*").order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ rules: data, limit: client.plan === "growth" ? 20 : 8 });
+  return NextResponse.json({ rules: data, limit: client.plan === "growth" ? 20 : 8, plan: client.plan });
 }
 
 export async function POST(req: NextRequest) {

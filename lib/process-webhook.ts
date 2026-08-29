@@ -1,7 +1,7 @@
 import { getCentralClient } from "./supabase-central";
 import { getClientDbServiceClient } from "./supabase-client-db";
 import { findMatchingCommentRule, matches, CommentRule } from "./rules";
-import { replyToComment, sendPrivateReplyToComment, sendDirectMessage } from "./meta";
+import { replyToComment, sendPrivateReplyToComment, sendDirectMessage, sendMediaMessage } from "./meta";
 import { generateAiReply } from "./groq";
 
 interface CommentChangeValue {
@@ -47,7 +47,11 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
 
     for (const change of entry.changes || []) {
       if (change.field === "comments" && change.value.id && change.value.text) {
-        await handleComment(client, { id: change.value.id, text: change.value.text });
+        await handleComment(client, {
+          id: change.value.id,
+          text: change.value.text,
+          fromId: change.value.from?.id,
+        });
       }
     }
 
@@ -60,8 +64,8 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
 }
 
 async function handleComment(
-  client: { supabase_url: string; supabase_service_key: string; meta_access_token: string },
-  comment: { id: string; text: string }
+  client: { supabase_url: string; supabase_service_key: string; meta_access_token: string; meta_ig_business_id: string },
+  comment: { id: string; text: string; fromId?: string }
 ) {
   const clientDb = getClientDbServiceClient(client.supabase_url, client.supabase_service_key);
 
@@ -82,6 +86,9 @@ async function handleComment(
   if (matched.action_type === "dm" || matched.action_type === "both") {
     if (matched.dm_text) {
       await sendPrivateReplyToComment(comment.id, matched.dm_text, token);
+    }
+    if (matched.dm_media_url && comment.fromId) {
+      await sendMediaMessage(client.meta_ig_business_id, comment.fromId, matched.dm_media_url, token);
     }
   }
 }
@@ -108,6 +115,9 @@ async function handleDirectMessage(
       if (matches(text, rule.trigger_word, rule.match_method)) {
         if (rule.reply_text) {
           await sendDirectMessage(client.meta_ig_business_id, senderId, rule.reply_text, token);
+        }
+        if (rule.media_url) {
+          await sendMediaMessage(client.meta_ig_business_id, senderId, rule.media_url, token);
         }
         return;
       }

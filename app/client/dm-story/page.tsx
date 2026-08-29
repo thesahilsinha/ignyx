@@ -23,13 +23,15 @@ interface DmStoryRule {
   trigger_word: string;
   match_method: string;
   reply_text: string | null;
+  media_url: string | null;
 }
 
-const emptyForm = { channel: "dm", trigger_word: "", match_method: "contains", reply_text: "" };
+const emptyForm = { channel: "dm", trigger_word: "", match_method: "contains", reply_text: "", media_url: "" };
 
 export default function DmStoryPage() {
   const [rules, setRules] = useState<DmStoryRule[]>([]);
   const [limit, setLimit] = useState(10);
+  const [plan, setPlan] = useState("starter");
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -40,6 +42,7 @@ export default function DmStoryPage() {
     const data = await res.json();
     setRules(data.rules || []);
     setLimit(data.limit || 10);
+    setPlan(data.plan || "starter");
   }
 
   useEffect(() => {
@@ -53,6 +56,7 @@ export default function DmStoryPage() {
       trigger_word: rule.trigger_word,
       match_method: rule.match_method,
       reply_text: rule.reply_text || "",
+      media_url: rule.media_url || "",
     });
     setShowForm(true);
   }
@@ -94,6 +98,8 @@ export default function DmStoryPage() {
     await fetch(`/api/client/dm-story-rules?id=${id}`, { method: "DELETE" });
     loadRules();
   }
+
+  const isGrowth = plan === "growth";
 
   return (
     <AppShell title="IGNYX" navItems={navItems}>
@@ -139,6 +145,18 @@ export default function DmStoryPage() {
             onChange={(e) => setForm({ ...form, reply_text: e.target.value })}
             className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2"
           />
+          {isGrowth ? (
+            <input
+              placeholder="Image or video URL (optional)"
+              value={form.media_url}
+              onChange={(e) => setForm({ ...form, media_url: e.target.value })}
+              className="border border-[var(--color-border)] bg-transparent rounded-lg px-3 py-2 md:col-span-2"
+            />
+          ) : (
+            <p className="text-xs text-[var(--color-text-muted)] md:col-span-2">
+              Media replies are a Growth-plan feature.
+            </p>
+          )}
           {error && <p className="text-sm text-red-500 md:col-span-2">{error}</p>}
           <button type="submit" className="md:col-span-2 btn-primary py-2 text-sm">
             {editingId ? "Save changes" : "Save rule"}
@@ -153,7 +171,10 @@ export default function DmStoryPage() {
               <div className="font-medium text-sm capitalize">
                 [{r.channel.replace("_", " ")}] &quot;{r.trigger_word}&quot; ({r.match_method})
               </div>
-              <div className="text-sm text-[var(--color-text-muted)]">{r.reply_text}</div>
+              <div className="text-sm text-[var(--color-text-muted)]">
+                {r.reply_text}
+                {r.media_url && <span> · has media</span>}
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={() => startEdit(r)} className="text-sm ig-gradient-text font-medium">Edit</button>
