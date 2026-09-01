@@ -2,6 +2,7 @@
 
 import { useState, ReactNode } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 
 interface NavItem {
@@ -17,6 +18,28 @@ interface AppShellProps {
 
 export default function AppShell({ title, navItems, children }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const pathname = usePathname();
+  const router = useRouter();
+  const isAdmin = pathname.startsWith("/admin");
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push(isAdmin ? "/admin" : "/client");
+  }
+
+  const LogoutButton = (
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[var(--color-text-muted)] hover:bg-[var(--color-surface-muted)] hover:text-red-500 transition w-full"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>
+      Log out
+    </button>
+  );
 
   return (
     <div className="min-h-screen flex">
@@ -25,7 +48,7 @@ export default function AppShell({ title, navItems, children }: AppShellProps) {
           <span className="text-lg font-bold ig-gradient-text">{title}</span>
           <ThemeToggle />
         </div>
-        <nav className="flex flex-col gap-1">
+        <nav className="flex flex-col gap-1 flex-1">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -36,6 +59,7 @@ export default function AppShell({ title, navItems, children }: AppShellProps) {
             </Link>
           ))}
         </nav>
+        <div className="border-t border-[var(--color-border)] pt-2 mt-2">{LogoutButton}</div>
       </aside>
 
       <div className="flex-1 flex flex-col">
@@ -56,12 +80,12 @@ export default function AppShell({ title, navItems, children }: AppShellProps) {
         {drawerOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
             <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} />
-            <div className="absolute left-0 top-0 h-full w-64 bg-[var(--color-surface)] p-4">
+            <div className="absolute left-0 top-0 h-full w-64 bg-[var(--color-surface)] p-4 flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <span className="font-bold ig-gradient-text">{title}</span>
                 <button onClick={() => setDrawerOpen(false)} aria-label="Close menu">✕</button>
               </div>
-              <nav className="flex flex-col gap-1">
+              <nav className="flex flex-col gap-1 flex-1">
                 {navItems.map((item) => (
                   <Link
                     key={item.href}
@@ -73,6 +97,7 @@ export default function AppShell({ title, navItems, children }: AppShellProps) {
                   </Link>
                 ))}
               </nav>
+              <div className="border-t border-[var(--color-border)] pt-2 mt-2">{LogoutButton}</div>
             </div>
           </div>
         )}
