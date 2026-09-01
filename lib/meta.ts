@@ -88,8 +88,6 @@ export async function getPagesAndIgAccount(userToken: string): Promise<{
   };
 }
 
-// --- Instagram Login (API with Instagram Login) functions, used for the primary connect flow ---
-
 const IG_GRAPH_BASE = "https://graph.instagram.com/v21.0";
 
 export async function replyToComment(commentId: string, message: string, token: string): Promise<void> {
@@ -104,7 +102,21 @@ export async function replyToComment(commentId: string, message: string, token: 
   }
 }
 
-export async function sendPrivateReplyToComment(igUserId: string, commentId: string, message: string, token: string): Promise<void> {n  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {n    method: "POST",n    headers: { "Content-Type": "application/json" },n    body: JSON.stringify({n      recipient: { comment_id: commentId },n      message: { text: message },n      access_token: token,n    }),n  });n  if (!res.ok) {n    const data = await res.json();n    throw new Error(data.error?.message || "Failed to send private reply");n  }n}
+export async function sendPrivateReplyToComment(igUserId: string, commentId: string, message: string, token: string): Promise<void> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      recipient: { comment_id: commentId },
+      message: { text: message },
+      access_token: token,
+    }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error?.message || "Failed to send private reply");
+  }
+}
 
 export async function sendDirectMessage(igUserId: string, recipientId: string, message: string, token: string): Promise<void> {
   const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {
@@ -122,51 +134,9 @@ export async function sendDirectMessage(igUserId: string, recipientId: string, m
   }
 }
 
-
-export async function createMediaContainer(igUserId: string, imageUrl: string, caption: string, token: string): Promise<string> {
-  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/media`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ image_url: imageUrl, caption, access_token: token }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || "Failed to create media container");
-  return data.id as string;
-}
-
-export async function publishMediaContainer(igUserId: string, containerId: string, token: string): Promise<string> {
-  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/media_publish`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ creation_id: containerId, access_token: token }),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || "Failed to publish container");
-  return data.id as string;
-}
-
-
-export async function getAdAccountId(userToken: string): Promise<string | null> {
-  const res = await fetch(`https://graph.facebook.com/v21.0/me/adaccounts?fields=id,name&access_token=${userToken}`);
-  const data = await res.json();
-  if (!res.ok || !data.data || data.data.length === 0) return null;
-  return data.data[0].id as string;
-}
-
-export async function getAdInsights(adAccountId: string, token: string) {
-  const fields = "spend,impressions,reach,clicks,ctr";
-  const res = await fetch(
-    `https://graph.facebook.com/v21.0/${adAccountId}/insights?fields=${fields}&date_preset=last_30d&access_token=${token}`
-  );
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || "Failed to fetch ad insights");
-  return data.data?.[0] || null;
-}
-
-
 export async function sendMediaMessage(igUserId: string, recipientId: string, mediaUrl: string, token: string): Promise<void> {
   const isVideo = /\.(mp4|mov|m4v)$/i.test(mediaUrl);
-  const res = await fetch(`https://graph.instagram.com/v21.0/${igUserId}/messages`, {
+  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -184,4 +154,43 @@ export async function sendMediaMessage(igUserId: string, recipientId: string, me
     const data = await res.json();
     throw new Error(data.error?.message || "Failed to send media message");
   }
+}
+
+export async function createMediaContainer(igUserId: string, imageUrl: string, caption: string, token: string): Promise<string> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image_url: imageUrl, caption, access_token: token }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to create media container");
+  return data.id as string;
+}
+
+export async function publishMediaContainer(igUserId: string, containerId: string, token: string): Promise<string> {
+  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: containerId, access_token: token }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to publish container");
+  return data.id as string;
+}
+
+export async function getAdAccountId(userToken: string): Promise<string | null> {
+  const res = await fetch(`${GRAPH_BASE}/me/adaccounts?fields=id,name&access_token=${userToken}`);
+  const data = await res.json();
+  if (!res.ok || !data.data || data.data.length === 0) return null;
+  return data.data[0].id as string;
+}
+
+export async function getAdInsights(adAccountId: string, token: string) {
+  const fields = "spend,impressions,reach,clicks,ctr";
+  const res = await fetch(
+    `${GRAPH_BASE}/${adAccountId}/insights?fields=${fields}&date_preset=last_30d&access_token=${token}`
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Failed to fetch ad insights");
+  return data.data?.[0] || null;
 }
