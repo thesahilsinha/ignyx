@@ -104,17 +104,7 @@ export async function replyToComment(commentId: string, message: string, token: 
   }
 }
 
-export async function sendPrivateReplyToComment(commentId: string, message: string, token: string): Promise<void> {
-  const res = await fetch(`${IG_GRAPH_BASE}/${commentId}/private_replies`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message, access_token: token }),
-  });
-  if (!res.ok) {
-    const data = await res.json();
-    throw new Error(data.error?.message || "Failed to send private reply");
-  }
-}
+export async function sendPrivateReplyToComment(igUserId: string, commentId: string, message: string, token: string): Promise<void> {n  const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {n    method: "POST",n    headers: { "Content-Type": "application/json" },n    body: JSON.stringify({n      recipient: { comment_id: commentId },n      message: { text: message },n      access_token: token,n    }),n  });n  if (!res.ok) {n    const data = await res.json();n    throw new Error(data.error?.message || "Failed to send private reply");n  }n}
 
 export async function sendDirectMessage(igUserId: string, recipientId: string, message: string, token: string): Promise<void> {
   const res = await fetch(`${IG_GRAPH_BASE}/${igUserId}/messages`, {
