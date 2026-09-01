@@ -114,7 +114,7 @@ async function handleComment(
   if (matched.action_type === "dm" || matched.action_type === "both") {
     if (matched.dm_text) {
       try {
-        await sendPrivateReplyToComment(comment.id, matched.dm_text, token);
+        await sendPrivateReplyToComment(client.meta_ig_business_id, comment.id, matched.dm_text, token);
         console.log("WEBHOOK: private reply sent");
       } catch (err) {
         console.log("WEBHOOK: private reply FAILED:", err instanceof Error ? err.message : String(err));
