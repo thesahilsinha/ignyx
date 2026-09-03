@@ -21,18 +21,47 @@ interface AnalyticsSummary {
 
 export default function AdminDashboard() {
   const [data, setData] = useState<AnalyticsSummary | null>(null);
+  const [maintenance, setMaintenance] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/analytics")
-      .then((res) => res.json())
-      .then(setData);
+    fetch("/api/admin/analytics").then((res) => res.json()).then(setData);
+    fetch("/api/admin/maintenance").then((res) => res.json()).then((d) => setMaintenance(d.maintenance_mode));
   }, []);
+
+  async function toggleMaintenance() {
+    setToggling(true);
+    const res = await fetch("/api/admin/maintenance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ maintenance_mode: !maintenance }),
+    });
+    const d = await res.json();
+    setMaintenance(d.maintenance_mode);
+    setToggling(false);
+  }
 
   return (
     <AppShell title="IGNYX Admin" navItems={navItems}>
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1">Admin overview</h1>
         <p className="text-sm text-[var(--color-text-muted)]">A snapshot of how IGNYX is doing right now.</p>
+      </div>
+
+      <div className={`card p-4 mb-6 flex items-center justify-between ${maintenance ? "border-amber-400" : ""}`}>
+        <div>
+          <div className="font-medium text-sm">Client dashboard maintenance mode</div>
+          <div className="text-xs text-[var(--color-text-muted)]">
+            {maintenance ? "Clients currently can't access their dashboard. Automation keeps running." : "Everything is accessible normally."}
+          </div>
+        </div>
+        <button
+          onClick={toggleMaintenance}
+          disabled={toggling}
+          className={`px-4 py-2 rounded-lg text-sm font-medium ${maintenance ? "bg-amber-500 text-white" : "btn-primary"}`}
+        >
+          {maintenance ? "Turn off" : "Turn on"}
+        </button>
       </div>
 
       {data && (

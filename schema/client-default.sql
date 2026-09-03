@@ -45,3 +45,9 @@ create table if not exists ai_context (
   context_text text not null,
   updated_at timestamptz not null default now()
 );
+
+create table if not exists activity_log (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('comment_reply','dm_reply')),
+  created_at timestamptz not null default now()
+);

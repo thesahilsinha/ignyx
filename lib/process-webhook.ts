@@ -31,6 +31,14 @@ interface WebhookPayload {
   entry: WebhookEntry[];
 }
 
+async function logActivity(clientDb: ReturnType<typeof getClientDbServiceClient>, type: "comment_reply" | "dm_reply") {
+  try {
+    await clientDb.from("activity_log").insert({ type });
+  } catch {
+    // logging failure should never break the actual reply flow
+  }
+}
+
 export async function processInstagramWebhook(payload: WebhookPayload): Promise<void> {
   const centralDb = getCentralClient();
 
@@ -46,6 +54,10 @@ export async function processInstagramWebhook(payload: WebhookPayload): Promise<
 
       if (!client || !client.meta_access_token) {
         console.log(`WEBHOOK [${igUserId}]: no client or token found for this igUserId`);
+        continue;
+      }
+      if (client.status !== "active" && client.status !== "trial") {
+        console.log(`WEBHOOK [${client.business_name}]: status is ${client.status}, skipping automation`);
         continue;
       }
       console.log(`WEBHOOK [${client.business_name}]: entry received`);
@@ -99,11 +111,13 @@ async function handleComment(
   console.log(`WEBHOOK: comment matched rule "${matched.trigger_word}", action ${matched.action_type}`);
 
   const token = client.meta_access_token;
+  let sentSomething = false;
 
   if (matched.action_type === "reply" || matched.action_type === "both") {
     if (matched.reply_text) {
       try {
         await replyToComment(comment.id, matched.reply_text, token);
+        sentSomething = true;
         console.log("WEBHOOK: public reply sent");
       } catch (err) {
         console.log("WEBHOOK: public reply FAILED:", err instanceof Error ? err.message : String(err));
@@ -115,6 +129,7 @@ async function handleComment(
     if (matched.dm_text) {
       try {
         await sendPrivateReplyToComment(client.meta_ig_business_id, comment.id, matched.dm_text, token);
+        sentSomething = true;
         console.log("WEBHOOK: private reply sent");
       } catch (err) {
         console.log("WEBHOOK: private reply FAILED:", err instanceof Error ? err.message : String(err));
@@ -129,6 +144,8 @@ async function handleComment(
       }
     }
   }
+
+  if (sentSomething) await logActivity(clientDb, "comment_reply");
 }
 
 async function handleDirectMessage(
@@ -153,9 +170,11 @@ async function handleDirectMessage(
     for (const rule of rules) {
       if (matches(text, rule.trigger_word, rule.match_method)) {
         console.log(`WEBHOOK: dm matched rule "${rule.trigger_word}"`);
+        let sent = false;
         if (rule.reply_text) {
           try {
             await sendDirectMessage(client.meta_ig_business_id, senderId, rule.reply_text, token);
+            sent = true;
             console.log("WEBHOOK: dm rule reply sent");
           } catch (err) {
             console.log("WEBHOOK: dm rule reply FAILED:", err instanceof Error ? err.message : String(err));
@@ -169,6 +188,7 @@ async function handleDirectMessage(
             console.log("WEBHOOK: dm rule media FAILED:", err instanceof Error ? err.message : String(err));
           }
         }
+        if (sent) await logActivity(clientDb, "dm_reply");
         return;
       }
     }
@@ -182,6 +202,7 @@ async function handleDirectMessage(
       try {
         await sendDirectMessage(client.meta_ig_business_id, senderId, aiReply, token);
         console.log("WEBHOOK: ai+ reply sent");
+        await logActivity(clientDb, "dm_reply");
       } catch (err) {
         console.log("WEBHOOK: ai+ reply FAILED:", err instanceof Error ? err.message : String(err));
       }
@@ -199,6 +220,7 @@ async function handleDirectMessage(
     try {
       await sendDirectMessage(client.meta_ig_business_id, senderId, fallback.content, token);
       console.log("WEBHOOK: fallback reply sent");
+      await logActivity(clientDb, "dm_reply");
     } catch (err) {
       console.log("WEBHOOK: fallback reply FAILED:", err instanceof Error ? err.message : String(err));
     }
