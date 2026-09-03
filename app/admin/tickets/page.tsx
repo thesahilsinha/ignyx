@@ -3,14 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/admin/dashboard" },
-  { label: "Clients", href: "/admin/clients" },
-  { label: "Guide", href: "/admin/guide" },
-  { label: "Onboarding", href: "/admin/onboarding" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Analytics", href: "/admin/analytics" },
-];
+import { adminNavItems } from "@/lib/admin-nav";
+
+const navItems = adminNavItems;
 
 interface TicketRow {
   id: string;
@@ -52,7 +47,7 @@ export default function AdminTicketsPage() {
         {tickets.map((t) => (
           <div key={t.id} className="gradient-border p-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-medium text-sm">{t.clients?.business_name || "Unknown client"} — {t.subject}</span>
+              <span className="font-medium text-sm">{t.clients?.business_name || "Unknown client"} â€” {t.subject}</span>
               <select
                 value={t.status}
                 onChange={(e) => updateStatus(t.id, e.target.value)}

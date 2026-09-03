@@ -1,14 +1,9 @@
 import AppShell from "@/components/AppShell";
 import { AccordionSection } from "@/components/Accordion";
 
-const navItems = [
-  { label: "Home", href: "/admin/dashboard" },
-  { label: "Clients", href: "/admin/clients" },
-  { label: "Guide", href: "/admin/guide" },
-  { label: "Onboarding", href: "/admin/onboarding" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Analytics", href: "/admin/analytics" },
-];
+import { adminNavItems } from "@/lib/admin-nav";
+
+const navItems = adminNavItems;
 
 function Warn({ children }: { children: React.ReactNode }) {
   return (
@@ -30,11 +25,11 @@ export default function AdminGuidePage() {
 
       <AccordionSection title="Client statuses" subtitle="What each one means" defaultOpen>
         <ul className="list-disc list-inside space-y-1">
-          <li><strong>in_review</strong> — client added, nothing live yet.</li>
-          <li><strong>trial</strong> — free trial period.</li>
-          <li><strong>active</strong> — paying, fully live.</li>
-          <li><strong>hold</strong> — temporarily paused, usually a payment issue.</li>
-          <li><strong>suspended</strong> — access revoked.</li>
+          <li><strong>in_review</strong> â€” client added, nothing live yet.</li>
+          <li><strong>trial</strong> â€” free trial period.</li>
+          <li><strong>active</strong> â€” paying, fully live.</li>
+          <li><strong>hold</strong> â€” temporarily paused, usually a payment issue.</li>
+          <li><strong>suspended</strong> â€” access revoked.</li>
         </ul>
       </AccordionSection>
 
@@ -44,13 +39,13 @@ export default function AdminGuidePage() {
         </p>
         <ul className="list-disc list-inside space-y-1">
           <li>
-            <strong>App roles</strong> (App settings → App roles) grants access to the Meta app itself. It does
+            <strong>App roles</strong> (App settings â†’ App roles) grants access to the Meta app itself. It does
             <strong> not</strong> send an Instagram invite and won&apos;t let a client&apos;s account send messages or comments.
           </li>
           <li>
-            <strong>Instagram Testers</strong> (Instagram API → Generate access tokens → Add account) is the one that
+            <strong>Instagram Testers</strong> (Instagram API â†’ Generate access tokens â†’ Add account) is the one that
             actually invites the client&apos;s Instagram account. They accept it from inside the Instagram app, under
-            Settings → Apps and websites → Tester invites.
+            Settings â†’ Apps and websites â†’ Tester invites.
           </li>
         </ul>
         <Warn>

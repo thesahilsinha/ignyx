@@ -3,19 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 interface Ticket {
   id: string;

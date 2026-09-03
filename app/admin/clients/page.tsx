@@ -4,14 +4,9 @@ import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 import type { Client } from "@/types";
 
-const navItems = [
-  { label: "Home", href: "/admin/dashboard" },
-  { label: "Clients", href: "/admin/clients" },
-  { label: "Guide", href: "/admin/guide" },
-  { label: "Onboarding", href: "/admin/onboarding" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Analytics", href: "/admin/analytics" },
-];
+import { adminNavItems } from "@/lib/admin-nav";
+
+const navItems = adminNavItems;
 
 const statusOptions = ["active", "hold", "trial", "suspended", "in_review"];
 

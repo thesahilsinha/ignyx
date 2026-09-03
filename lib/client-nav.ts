@@ -1,0 +1,16 @@
+export const clientNavItems = [
+  { label: "Home", href: "/client/dashboard" },
+  { label: "Insights", href: "/client/insights" },
+  { label: "Comments", href: "/client/comments" },
+  { label: "DM / Story", href: "/client/dm-story" },
+  { label: "Library", href: "/client/library" },
+  { label: "Schedule", href: "/client/schedule" },
+  { label: "AI+", href: "/client/ai-plus" },
+  { label: "Catalogue", href: "/client/catalogue" },
+  { label: "Greeting", href: "/client/greeting" },
+  { label: "Analytics", href: "/client/analytics" },
+  { label: "Ads", href: "/client/ads" },
+  { label: "Security", href: "/client/security" },
+  { label: "Guide", href: "/client/guide" },
+  { label: "Tickets", href: "/client/tickets" },
+];

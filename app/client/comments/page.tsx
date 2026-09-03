@@ -3,19 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 interface CommentRule {
   id: string;
@@ -184,12 +174,12 @@ export default function CommentsPage() {
           <div key={r.id} className="card p-4 flex items-center justify-between">
             <div>
               <div className="font-medium text-sm">
-                &quot;{r.trigger_word}&quot; ({r.match_method}) — {r.action_type}
+                &quot;{r.trigger_word}&quot; ({r.match_method}) â€” {r.action_type}
               </div>
               <div className="text-sm text-[var(--color-text-muted)]">
                 {r.reply_text && <span>Reply: {r.reply_text} </span>}
                 {r.dm_text && <span>DM: {r.dm_text} </span>}
-                {r.dm_media_url && <span>· has media</span>}
+                {r.dm_media_url && <span>Â· has media</span>}
               </div>
             </div>
             <div className="flex items-center gap-3">

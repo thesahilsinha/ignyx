@@ -3,19 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 interface Insights {
   spend?: string;
@@ -60,7 +50,7 @@ export default function AdsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold mb-1">Ads analytics</h1>
         <p className="text-sm text-[var(--color-text-muted)]">
-          <span className="ig-gradient-text font-medium">{isGrowth ? "Advanced" : "Basic"}</span> — last 30 days
+          <span className="ig-gradient-text font-medium">{isGrowth ? "Advanced" : "Basic"}</span> â€” last 30 days
         </p>
       </div>
 
@@ -81,7 +71,7 @@ export default function AdsPage() {
 
       {insights && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Kpi label="Spend" value={`₹${insights.spend || "0"}`} />
+          <Kpi label="Spend" value={`â‚¹${insights.spend || "0"}`} />
           <Kpi label="Reach" value={insights.reach || "0"} />
           <Kpi label="Impressions" value={insights.impressions || "0"} />
           {isGrowth && (

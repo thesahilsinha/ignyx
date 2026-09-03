@@ -3,16 +3,17 @@
 import { useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/admin/dashboard" },
-  { label: "Clients", href: "/admin/clients" },
-  { label: "Guide", href: "/admin/guide" },
-  { label: "Onboarding", href: "/admin/onboarding" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Analytics", href: "/admin/analytics" },
-];
+import { adminNavItems } from "@/lib/admin-nav";
 
-const defaultSql = `create table if not exists comment_rules (
+const navItems = adminNavItems;
+
+const defaultSql = `create table if not exists activity_log (
+  id uuid primary key default gen_random_uuid(),
+  type text not null check (type in ('comment_reply','dm_reply')),
+  created_at timestamptz not null default now()
+);
+
+create table if not exists comment_rules (
   id uuid primary key default gen_random_uuid(),
   trigger_word text not null,
   match_method text not null check (match_method in ('exact','starts_with','contains')),
@@ -75,11 +76,11 @@ export default function OnboardingPage() {
       <ol className="card p-6 space-y-3 text-sm list-decimal list-inside mb-6">
         <li>Client creates a new Supabase project, shares the Project URL, anon key, and service role key.</li>
         <li>Client also creates an Instagram Business account, links it to a Facebook Page.</li>
-        <li>Go to Clients → Add client, enter their details plus the three Supabase values.</li>
+        <li>Go to Clients Ã¢â€ â€™ Add client, enter their details plus the three Supabase values.</li>
         <li>Open that Supabase project&apos;s SQL editor, paste and run the schema below.</li>
         <li>
-          In Meta&apos;s dashboard, go to Instagram API → Generate access tokens → Add account, enter the client&apos;s
-          Instagram username. They must accept the tester invite from Instagram → Settings → Apps and websites.
+          In Meta&apos;s dashboard, go to Instagram API Ã¢â€ â€™ Generate access tokens Ã¢â€ â€™ Add account, enter the client&apos;s
+          Instagram username. They must accept the tester invite from Instagram Ã¢â€ â€™ Settings Ã¢â€ â€™ Apps and websites.
         </li>
         <li>Once accepted, click Generate token for their row. Also confirm their Webhook Subscription toggle is On.</li>
         <li>

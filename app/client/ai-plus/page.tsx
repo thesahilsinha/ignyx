@@ -3,19 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 export default function AiPlusPage() {
   const [enabled, setEnabled] = useState(false);
@@ -70,7 +60,7 @@ export default function AiPlusPage() {
           value={context}
           onChange={(e) => setContext(e.target.value)}
           rows={8}
-          placeholder="e.g. We sell handmade candles, ship across India in 3-5 days, prices range ₹299-₹899. Be warm and concise."
+          placeholder="e.g. We sell handmade candles, ship across India in 3-5 days, prices range â‚¹299-â‚¹899. Be warm and concise."
           className="w-full border border-[var(--color-border)] rounded-md px-3 py-2 mb-3"
         />
         <button onClick={save} className="bg-[var(--color-accent)] text-white px-4 py-2 rounded-md text-sm">

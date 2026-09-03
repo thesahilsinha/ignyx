@@ -4,14 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/admin/dashboard" },
-  { label: "Clients", href: "/admin/clients" },
-  { label: "Guide", href: "/admin/guide" },
-  { label: "Onboarding", href: "/admin/onboarding" },
-  { label: "Tickets", href: "/admin/tickets" },
-  { label: "Analytics", href: "/admin/analytics" },
-];
+import { adminNavItems } from "@/lib/admin-nav";
+
+const navItems = adminNavItems;
 
 interface AnalyticsSummary {
   totalClients: number;
@@ -76,7 +71,7 @@ export default function AdminDashboard() {
           </div>
           <div className="card p-5">
             <div className="text-xs text-[var(--color-text-muted)] mb-1">Revenue collected</div>
-            <div className="text-2xl font-bold">₹{data.totalRevenue.toLocaleString("en-IN")}</div>
+            <div className="text-2xl font-bold">â‚¹{data.totalRevenue.toLocaleString("en-IN")}</div>
           </div>
         </div>
       )}

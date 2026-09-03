@@ -3,19 +3,9 @@
 import { useEffect, useState } from "react";
 import AppShell from "@/components/AppShell";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 interface DmStoryRule {
   id: string;
@@ -173,7 +163,7 @@ export default function DmStoryPage() {
               </div>
               <div className="text-sm text-[var(--color-text-muted)]">
                 {r.reply_text}
-                {r.media_url && <span> · has media</span>}
+                {r.media_url && <span> Â· has media</span>}
               </div>
             </div>
             <div className="flex items-center gap-3">

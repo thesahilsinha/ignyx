@@ -1,19 +1,9 @@
 import AppShell from "@/components/AppShell";
 import { AccordionSection } from "@/components/Accordion";
 
-const navItems = [
-  { label: "Home", href: "/client/dashboard" },
-  { label: "Comments", href: "/client/comments" },
-  { label: "DM / Story", href: "/client/dm-story" },
-  { label: "Schedule", href: "/client/schedule" },
-  { label: "AI+", href: "/client/ai-plus" },
-  { label: "Catalogue", href: "/client/catalogue" },
-  { label: "Greeting", href: "/client/greeting" },
-  { label: "Analytics", href: "/client/analytics" },
-  { label: "Ads", href: "/client/ads" },
-  { label: "Guide", href: "/client/guide" },
-  { label: "Tickets", href: "/client/tickets" },
-];
+import { clientNavItems } from "@/lib/client-nav";
+
+const navItems = clientNavItems;
 
 function Step({ n, children }: { n: number; children: React.ReactNode }) {
   return (
@@ -55,9 +45,9 @@ export default function ClientGuidePage() {
         <Step n={2}>
           <strong>Pick how it should match:</strong>
           <ul className="list-disc list-inside mt-1">
-            <li><strong>Exact</strong> — the comment must be only that word, nothing else.</li>
-            <li><strong>Starts with</strong> — the comment must begin with that word.</li>
-            <li><strong>Contains</strong> — the word can appear anywhere in the comment. Most people use this one.</li>
+            <li><strong>Exact</strong> â€” the comment must be only that word, nothing else.</li>
+            <li><strong>Starts with</strong> â€” the comment must begin with that word.</li>
+            <li><strong>Contains</strong> â€” the word can appear anywhere in the comment. Most people use this one.</li>
           </ul>
         </Step>
         <Step n={3}>
