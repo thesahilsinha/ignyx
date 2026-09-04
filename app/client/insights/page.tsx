@@ -10,25 +10,27 @@ const navItems = clientNavItems;
 interface MediaItem {
   id: string;
   caption?: string;
-  media_type: string;
   media_url?: string;
   thumbnail_url?: string;
   permalink: string;
   like_count?: number;
   comments_count?: number;
+  view_count?: number;
 }
 
 interface CommentItem {
   text: string;
-  username?: string;
+  username: string;
   timestamp: string;
   postCaption?: string;
 }
 
 interface InsightsData {
   media: MediaItem[];
+  nextCursor: string | null;
   recentComments: CommentItem[];
   viewsGraph: { date: string; views: number; reach: number }[];
+  viewsGraphError: string | null;
   commentRepliesSent: number;
   dmRepliesSent: number;
   error?: string;
@@ -36,11 +38,21 @@ interface InsightsData {
 
 export default function InsightsPage() {
   const [data, setData] = useState<InsightsData | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [range, setRange] = useState<7 | 30>(7);
 
   useEffect(() => {
     fetch("/api/client/insights").then((res) => res.json()).then(setData);
   }, []);
+
+  async function loadMore() {
+    if (!data?.nextCursor) return;
+    setLoadingMore(true);
+    const res = await fetch(`/api/client/insights?after=${data.nextCursor}`);
+    const more: InsightsData = await res.json();
+    setData({ ...data, media: [...data.media, ...more.media], nextCursor: more.nextCursor });
+    setLoadingMore(false);
+  }
 
   if (!data) return null;
 
@@ -92,14 +104,16 @@ export default function InsightsPage() {
             </button>
           </div>
         </div>
-        {graphData.length > 0 ? (
+        {data.viewsGraphError ? (
+          <p className="text-sm text-red-500">{data.viewsGraphError}</p>
+        ) : graphData.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={graphData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="date" fontSize={11} />
               <YAxis fontSize={11} />
               <Tooltip />
-              <Line type="monotone" dataKey="views" stroke="var(--color-accent, #ff2e63)" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="views" stroke="#ff2e63" strokeWidth={2} dot={false} />
               <Line type="monotone" dataKey="reach" stroke="#833ab4" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -115,14 +129,20 @@ export default function InsightsPage() {
             {data.media.map((m) => (
               <a key={m.id} href={m.permalink} target="_blank" rel="noreferrer" className="card p-2 block">
                 <img src={m.thumbnail_url || m.media_url} alt="" className="w-full aspect-square object-cover rounded-lg mb-2" />
-                <div className="text-xs text-[var(--color-text-muted)] flex justify-between px-1">
+                <div className="text-xs text-[var(--color-text-muted)] flex flex-wrap gap-x-2 px-1">
                   <span>{m.like_count ?? 0} likes</span>
                   <span>{m.comments_count ?? 0} comments</span>
+                  {m.view_count != null && <span>{m.view_count} views</span>}
                 </div>
               </a>
             ))}
             {data.media.length === 0 && <p className="text-sm text-[var(--color-text-muted)] col-span-2">No posts found.</p>}
           </div>
+          {data.nextCursor && (
+            <button onClick={loadMore} disabled={loadingMore} className="w-full mt-3 btn-primary py-2 text-sm">
+              {loadingMore ? "Loading..." : "Load more"}
+            </button>
+          )}
         </div>
 
         <div>
@@ -131,7 +151,7 @@ export default function InsightsPage() {
             {data.recentComments.map((c, i) => (
               <div key={i} className="card p-3">
                 <div className="text-sm">
-                  <span className="font-medium">@{c.username || "unknown"}</span>: {c.text}
+                  <span className="font-medium">@{c.username}</span>: {c.text}
                 </div>
                 {c.postCaption && <div className="text-xs text-[var(--color-text-muted)] mt-1">on &quot;{c.postCaption}...&quot;</div>}
               </div>
